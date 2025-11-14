@@ -1,0 +1,6 @@
+﻿services:
+  myownmessagebroker:
+    image: myownmessagebroker
+    build:
+      context: .
+      dockerfile: MyOwnMessageBroker/Dockerfile
