@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyOwnMessageBroker.Data;
 using MyOwnMessageBroker.Enums;
@@ -33,15 +32,22 @@ public class MessageService
         return null;
     }
 
-    public async Task SetMessageStatusToSentBySubscriptionsId(List<int> subscriptionsIds)
+    public async Task SetMessageStatusToSentBySubscriptionsId(List<int> messageIds)
     {
-        foreach (var message in subscriptionsIds.Select(id => _dbContext.Messages
-                         .Where(m => m.SubscriptionId == id))
-                     .SelectMany(messages => messages))
+        var messages = await _dbContext.Messages
+            .Where(m => messageIds.Contains(m.Id))
+            .ToListAsync();
+
+        if (!messages.Any())
+        {
+            return;
+        }
+
+        foreach (var message in messages)
         {
             message.MessageStatus = MessageStatus.Sent;
-            _dbContext.Update(message);
-            await _dbContext.SaveChangesAsync();
         }
+
+        await _dbContext.SaveChangesAsync();
     }
 }
